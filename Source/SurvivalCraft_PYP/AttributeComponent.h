@@ -50,5 +50,14 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-		
+	// stat ekleme fonksiyonlari
+	UFUNCTION(BlueprintCallable, Category = "Attributes")
+	void AddHunger(float Amount);
+
+	UFUNCTION(BlueprintCallable, Category = "Attributes")
+	void AddThirst(float Amount);
+
+	UFUNCTION(BlueprintCallable, Category = "Attributes")
+	void Heal(float Amount);
+
 };

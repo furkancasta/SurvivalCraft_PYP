@@ -57,3 +57,18 @@ void UAttributeComponent::HandleStatDecay()
 		Health = FMath::Max(0.0f, Health - 2.0f); // Saglik 2 birim dusur.
 	}
 }
+
+void UAttributeComponent::AddThirst(float Amount)
+{
+	Thirst = FMath::Clamp(Thirst + Amount, 0.0f, MaxThirst);
+}
+
+void UAttributeComponent::Heal(float Amount)
+{
+	Health = FMath::Clamp(Health + Amount, 0.0f, MaxHealth);
+}
+
+void UAttributeComponent::AddHunger(float Amount)
+{
+	Hunger = FMath::Clamp(Hunger + Amount, 0.0f, MaxHunger);
+}
