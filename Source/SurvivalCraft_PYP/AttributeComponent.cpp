@@ -3,6 +3,7 @@
 
 #include "AttributeComponent.h"
 #include "TimerManager.h"
+#include "kismet/GameplayStatics.h"
 
 // Sets default values for this component's properties
 UAttributeComponent::UAttributeComponent()
@@ -56,6 +57,9 @@ void UAttributeComponent::HandleStatDecay()
 	{
 		Health = FMath::Max(0.0f, Health - 2.0f); // Saglik 2 birim dusur.
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Hunger: %f | Thirst: %f | Health: %f"), Hunger, Thirst, Health)
+	CheckDeath(); // Can dususu sonrasi kontrol et.
 }
 
 void UAttributeComponent::AddThirst(float Amount)
@@ -71,4 +75,21 @@ void UAttributeComponent::Heal(float Amount)
 void UAttributeComponent::AddHunger(float Amount)
 {
 	Hunger = FMath::Clamp(Hunger + Amount, 0.0f, MaxHunger);
+}
+
+void UAttributeComponent::CheckDeath()
+{
+	if (Health <= 0.0f)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Karakter Öldü! Seviye Yeniden Başlatılıyor..."));
+
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			FString CurrentLevelName = World->GetMapName();
+			CurrentLevelName.RemoveFromStart(World->StreamingLevelsPrefix);
+
+			UGameplayStatics::OpenLevel(World, FName(*CurrentLevelName));
+		}
+	}
 }

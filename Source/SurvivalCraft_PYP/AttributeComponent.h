@@ -16,6 +16,9 @@ public:
 	// Sets default values for this component's properties
 	UAttributeComponent();
 
+	// Can kontrolu ve olum mantigi
+	void CheckDeath();
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
