@@ -49,7 +49,7 @@ void UAttributeComponent::HandleStatDecay()
 	Hunger = FMath::Max(0.0f, Hunger - HungerDecayRate);
 	Thirst = FMath::Max(0.0f, Thirst - ThirstDecayRate);
 
-	// Log ekranına anlık değerleri yazdır
+	// log ekrani anlik degerleri yazdirir.
 	UE_LOG(LogTemp, Warning, TEXT("Hunger: %f | Thirst: %f | Health: %f"), Hunger, Thirst, Health);
 
 	// aclik susuzluk 0 olursa saglik dusur.
@@ -61,7 +61,7 @@ void UAttributeComponent::HandleStatDecay()
 	UE_LOG(LogTemp, Warning, TEXT("Hunger: %f | Thirst: %f | Health: %f"), Hunger, Thirst, Health)
 	CheckDeath(); // Can dususu sonrasi kontrol et.
 }
-
+// aclik susuzluk ve saglik ekleme fonksiyonlari
 void UAttributeComponent::AddThirst(float Amount)
 {
 	Thirst = FMath::Clamp(Thirst + Amount, 0.0f, MaxThirst);
@@ -76,7 +76,7 @@ void UAttributeComponent::AddHunger(float Amount)
 {
 	Hunger = FMath::Clamp(Hunger + Amount, 0.0f, MaxHunger);
 }
-
+// Can kontrolu ve olum mantigi
 void UAttributeComponent::CheckDeath()
 {
 	if (Health <= 0.0f)
@@ -92,4 +92,14 @@ void UAttributeComponent::CheckDeath()
 			UGameplayStatics::OpenLevel(World, FName(*CurrentLevelName));
 		}
 	}
+}
+// Stamina kullanma ve regen fonksiyonlari
+void UAttributeComponent::UseStamina(float Amount)
+{
+	Stamina = FMath::Clamp(Stamina - Amount, 0.0f, MaxStamina);
+}
+
+void UAttributeComponent::RegenStamina(float DeltaTime)
+{
+	Stamina = FMath::Clamp(Stamina + StaminaRegenRate * DeltaTime, 0.0f, MaxStamina);
 }

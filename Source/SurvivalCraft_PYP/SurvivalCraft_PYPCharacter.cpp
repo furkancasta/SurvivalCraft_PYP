@@ -59,6 +59,10 @@ void ASurvivalCraft_PYPCharacter::SetupPlayerInputComponent(UInputComponent* Pla
 		// Looking/Aiming
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASurvivalCraft_PYPCharacter::LookInput);
 		EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &ASurvivalCraft_PYPCharacter::LookInput);
+
+		// Sprinting
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ASurvivalCraft_PYPCharacter::StartSprint);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ASurvivalCraft_PYPCharacter::StopSprint);
 	}
 	else
 	{
@@ -117,4 +121,42 @@ void ASurvivalCraft_PYPCharacter::DoJumpEnd()
 {
 	// pass StopJumping to the character
 	StopJumping();
+}
+
+void ASurvivalCraft_PYPCharacter::StartSprint()
+{
+	if (GetCharacterMovement())
+	{
+		bIsSprinting = true;
+		GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+	}
+}
+
+
+void ASurvivalCraft_PYPCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (bIsSprinting)
+	{
+		CurrentStamina -= StaminaDrainRate * DeltaTime;
+		CurrentStamina = FMath::Clamp(CurrentStamina, 0.0f, MaxStamina);
+
+		// Stamina bittiyse koşmayı durdur
+		if (CurrentStamina <= 0.0f)
+		{
+			StopSprint();
+		}
+	}
+	else
+	{
+		// Koşmuyorken stamina dolsun
+		CurrentStamina += StaminaRegenRate * DeltaTime;
+		CurrentStamina = FMath::Clamp(CurrentStamina, 0.0f, MaxStamina);
+	}
+}
+
+float ASurvivalCraft_PYPCharacter::GetStaminaPercentage() const
+{
+	return CurrentStamina / MaxStamina;
 }

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "AttributeComponent.h"
 #include "SurvivalCraft_PYPCharacter.generated.h"
 
 class UInputComponent;
@@ -31,6 +32,7 @@ class ASurvivalCraft_PYPCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FirstPersonCameraComponent;
 
+
 protected:
 
 	/** Jump Input Action */
@@ -48,7 +50,40 @@ protected:
 	/** Mouse Look Input Action */
 	UPROPERTY(EditAnywhere, Category ="Input")
 	class UInputAction* MouseLookAction;
-	
+
+	// Sprint Input Action
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	class UInputAction* SprintAction;
+
+	// Sprint Input degerleri
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
+	bool bIsSprinting = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float WalkSpeed = 300.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float SprintSpeed = 600.0f;
+
+
+
+public:
+	// Stamina Değişkenleri
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
+	float MaxStamina = 100.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stamina")
+	float CurrentStamina = 100.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
+	float StaminaDrainRate = 25.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
+	float StaminaRegenRate = 20.0f;
+
+	virtual void Tick(float DeltaTime) override;
+
+
 public:
 	ASurvivalCraft_PYPCharacter();
 
@@ -75,6 +110,16 @@ protected:
 	/** Handles jump end inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpEnd();
+
+	/** Handles sprint inputs */
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	virtual void StartSprint();
+
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	virtual void StopSprint();
+
+	UFUNCTION(BlueprintCallable, Category = "Stamina")
+	float GetStaminaPercentage() const;
 
 protected:
 
