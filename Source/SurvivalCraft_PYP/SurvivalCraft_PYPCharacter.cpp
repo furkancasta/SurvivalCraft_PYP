@@ -7,8 +7,10 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
+#include "AttributeComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "SurvivalCraft_PYP.h"
+#include "../../../../Program Files/Epic Games/UE_5.8/Engine/Plugins/VirtualProduction/TextureShare/Source/TextureShareCore/Private/Module/TextureShareCoreLogDefines.h"
 
 ASurvivalCraft_PYPCharacter::ASurvivalCraft_PYPCharacter()
 {
@@ -42,6 +44,9 @@ ASurvivalCraft_PYPCharacter::ASurvivalCraft_PYPCharacter()
 	// Configure character movement
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 	GetCharacterMovement()->AirControl = 0.5f;
+
+	// bileseni bellekte baslatiyor
+	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComponent"));
 }
 
 void ASurvivalCraft_PYPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -168,4 +173,36 @@ void ASurvivalCraft_PYPCharacter::Tick(float DeltaTime)
 float ASurvivalCraft_PYPCharacter::GetStaminaPercentage() const
 {
 	return CurrentStamina / MaxStamina;
+}
+
+void ASurvivalCraft_PYPCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+
+	float FallVelocity = -GetCharacterMovement()->Velocity.Z;
+	float MinFallSpeed = 625.0f;
+
+	if (FallVelocity >= MinFallSpeed)
+	{
+		float BaseDamage = 30.0f;
+		float ExtraDamage = (FallVelocity - MinFallSpeed) * 0.1f;
+		float TotalDamage = BaseDamage + ExtraDamage;
+
+		if (AttributeComponent)
+		{
+			AttributeComponent->ApplyDamage(TotalDamage);
+
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Hasar Verildi: %f"), TotalDamage));
+			}
+		}
+		else
+		{
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("HATA: AttributeComponent NULL!"));
+			}
+		}
+	}
 }

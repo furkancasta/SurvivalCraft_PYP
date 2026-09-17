@@ -65,6 +65,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float SprintSpeed = 600.0f;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	class UAttributeComponent* AttributeComponent;
+
+protected:
+
+	// yere basma anini yakalayan unreal engine fonksiyonu
+	virtual void Landed(const FHitResult& Hit) override;
+
 
 
 public:

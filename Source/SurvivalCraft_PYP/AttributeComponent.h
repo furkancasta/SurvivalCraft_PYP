@@ -19,6 +19,9 @@ public:
 	// Can kontrolu ve olum mantigi
 	void CheckDeath();
 
+	// Hasar uygulama fonksiyonu
+	void ApplyDamage(float DamageAmount);
+
 protected:
 	// Called when the game starts
 	// Stats degiskenleri 

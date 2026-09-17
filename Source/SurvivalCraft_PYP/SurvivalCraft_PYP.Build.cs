@@ -6,7 +6,11 @@ public class SurvivalCraft_PYP : ModuleRules
 {
 	public SurvivalCraft_PYP(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+
+        // C4668 uyarısının derlemeyi kitlemesini engeller
+        bEnableUndefinedIdentifierWarnings = false;
+
+        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 		PublicDependencyModuleNames.AddRange(new string[] {
 			"Core",
