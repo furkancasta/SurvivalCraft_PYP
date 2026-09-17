@@ -132,6 +132,15 @@ void ASurvivalCraft_PYPCharacter::StartSprint()
 	}
 }
 
+void ASurvivalCraft_PYPCharacter::StopSprint()
+{
+	if (GetCharacterMovement())
+	{
+		bIsSprinting = false;
+		GetCharacterMovement()->MaxWalkSpeed = 300.0f;
+	}
+}
+
 
 void ASurvivalCraft_PYPCharacter::Tick(float DeltaTime)
 {
