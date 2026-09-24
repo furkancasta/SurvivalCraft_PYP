@@ -9,11 +9,16 @@
 #include "InputActionValue.h"
 #include "AttributeComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerController.h"
+#include "Camera/CameraShakeBase.h"
 #include "SurvivalCraft_PYP.h"
 #include "../../../../Program Files/Epic Games/UE_5.8/Engine/Plugins/VirtualProduction/TextureShare/Source/TextureShareCore/Private/Module/TextureShareCoreLogDefines.h"
 
 ASurvivalCraft_PYPCharacter::ASurvivalCraft_PYPCharacter()
 {
+	
+	PrimaryActorTick.bCanEverTick = true;
+	
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
 	
@@ -47,6 +52,13 @@ ASurvivalCraft_PYPCharacter::ASurvivalCraft_PYPCharacter()
 
 	// bileseni bellekte baslatiyor
 	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComponent"));
+}
+
+void ASurvivalCraft_PYPCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	SetActorTickEnabled(true);
 }
 
 void ASurvivalCraft_PYPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -151,6 +163,9 @@ void ASurvivalCraft_PYPCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// KAMERA SALLANTISI KONTROLÜNÜ BURAYA EKLİYORUZ
+	UpdateCameraShakeState();
+
 	if (bIsSprinting)
 	{
 		CurrentStamina -= StaminaDrainRate * DeltaTime;
@@ -180,6 +195,14 @@ void ASurvivalCraft_PYPCharacter::Landed(const FHitResult& Hit)
 	Super::Landed(Hit);
 
 	float FallVelocity = -GetCharacterMovement()->Velocity.Z;
+
+	// Zıplayıp/düşüp yere her indiğinde zıplama shake'ini oynat
+	if (JumpCameraShakeClass)
+	{
+		float ShakeScale = FMath::Clamp(FallVelocity / 625.0f, 0.5f, 2.0f);
+		PlayCameraShake(JumpCameraShakeClass, ShakeScale);
+	}
+
 	float MinFallSpeed = 625.0f;
 
 	if (FallVelocity >= MinFallSpeed)
@@ -203,6 +226,74 @@ void ASurvivalCraft_PYPCharacter::Landed(const FHitResult& Hit)
 			{
 				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("HATA: AttributeComponent NULL!"));
 			}
+		}
+	}
+}
+
+void ASurvivalCraft_PYPCharacter::PlayCameraShake(TSubclassOf<UCameraShakeBase> ShakeClass, float Scale)
+{
+	if (!ShakeClass) return;
+
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (PC && PC->PlayerCameraManager)
+	{
+		PC->PlayerCameraManager->StartCameraShake(ShakeClass, Scale);
+	}
+}
+
+void ASurvivalCraft_PYPCharacter::UpdateCameraShakeState()
+{
+	if (GetCharacterMovement() && GetCharacterMovement()->IsFalling())
+	{
+		return;
+	}
+
+	float Speed = GetVelocity().Size2D();
+	EMovementShakeState NewState = EMovementShakeState::Idle;
+
+	if (Speed > 350.0f)
+	{
+		NewState = EMovementShakeState::Running;
+	}
+	else if (Speed > 10.0f)
+	{
+		NewState = EMovementShakeState::Walking;
+	}
+	else
+	{
+		NewState = EMovementShakeState::Idle;
+	}
+
+	if (NewState != CurrentShakeState)
+	{
+		CurrentShakeState = NewState;
+
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, FString::Printf(TEXT("Durum Degisti: %d"), (int32)CurrentShakeState));
+		}
+
+		if (APlayerController* PC = Cast<APlayerController>(GetController()))
+		{
+			if (PC->PlayerCameraManager)
+			{
+				PC->PlayerCameraManager->StopAllCameraShakes(true);
+			}
+		}
+
+		switch (CurrentShakeState)
+		{
+		case EMovementShakeState::Idle:
+			if (IdleCameraShakeClass) PlayCameraShake(IdleCameraShakeClass, 1.0f);
+			break;
+
+		case EMovementShakeState::Walking:
+			if (WalkCameraShakeClass) PlayCameraShake(WalkCameraShakeClass, 1.0f);
+			break;
+
+		case EMovementShakeState::Running:
+			if (RunCameraShakeClass) PlayCameraShake(RunCameraShakeClass, 1.0f);
+			break;
 		}
 	}
 }

@@ -6,7 +6,16 @@
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "AttributeComponent.h"
+#include "Camera/CameraShakeBase.h"
 #include "SurvivalCraft_PYPCharacter.generated.h"
+
+UENUM(BlueprintType)
+enum class EMovementShakeState : uint8
+{
+	Idle,
+	Walking,
+	Running
+};
 
 class UInputComponent;
 class USkeletalMeshComponent;
@@ -68,10 +77,22 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UAttributeComponent* AttributeComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Shake")
+	TSubclassOf<UCameraShakeBase> IdleCameraShakeClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Shake")
+	TSubclassOf<UCameraShakeBase> WalkCameraShakeClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Shake")
+	TSubclassOf<UCameraShakeBase> RunCameraShakeClass;
+
 protected:
 
 	// yere basma anini yakalayan unreal engine fonksiyonu
 	virtual void Landed(const FHitResult& Hit) override;
+
+	// Unreal Engine'de karakterin oyuna basladigi an
+	virtual void BeginPlay() override;
 
 
 
@@ -89,11 +110,25 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
 	float StaminaRegenRate = 20.0f;
 
-	virtual void Tick(float DeltaTime) override;
-
 
 public:
 	ASurvivalCraft_PYPCharacter();
+
+	virtual void Tick(float DeltaTime) override;
+
+public:
+
+	// Kamera Sallama siniflari (Blueprint uzerinden atanabilir)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Shake")
+	TSubclassOf<UCameraShakeBase> JumpCameraShakeClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Shake")
+	TSubclassOf<UCameraShakeBase> SprintCameraShakeClass;
+
+	// Kamera sallantisini tetikleyen fonksiyonlar
+	UFUNCTION(BlueprintCallable, Category = "Camera Shake")
+	void PlayCameraShake(TSubclassOf<UCameraShakeBase> ShakeClass, float Scale = 1.0f);
+
 
 protected:
 
@@ -142,6 +177,10 @@ public:
 
 	/** Returns first person camera component **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+
+private:
+	EMovementShakeState CurrentShakeState = EMovementShakeState::Idle;
+	void UpdateCameraShakeState();
 
 };
 
