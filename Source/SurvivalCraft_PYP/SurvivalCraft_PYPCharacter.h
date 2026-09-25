@@ -182,5 +182,15 @@ private:
 	EMovementShakeState CurrentShakeState = EMovementShakeState::Idle;
 	void UpdateCameraShakeState();
 
-};
 
+	public:
+		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction")
+		class UPhysicsHandleComponent* PhysicsHandle;
+
+		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction")
+		class USceneComponent* SmallItemHoldLocation;
+
+		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction")
+		class USceneComponent* LargeItemDragLocation;
+
+};

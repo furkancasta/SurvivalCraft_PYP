@@ -11,6 +11,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Camera/CameraShakeBase.h"
+#include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "SurvivalCraft_PYP.h"
 #include "../../../../Program Files/Epic Games/UE_5.8/Engine/Plugins/VirtualProduction/TextureShare/Source/TextureShareCore/Private/Module/TextureShareCoreLogDefines.h"
 
@@ -52,6 +53,15 @@ ASurvivalCraft_PYPCharacter::ASurvivalCraft_PYPCharacter()
 
 	// bileseni bellekte baslatiyor
 	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComponent"));
+
+	PhysicsHandle = CreateDefaultSubobject<UPhysicsHandleComponent>(TEXT("PhysicsHandle"));
+
+	SmallItemHoldLocation = CreateDefaultSubobject<USceneComponent>(TEXT("SmallItemHoldLocation"));
+	SmallItemHoldLocation->SetupAttachment(FirstPersonCameraComponent);
+
+	LargeItemDragLocation = CreateDefaultSubobject<USceneComponent>(TEXT("LargeItemDragLocation"));
+	LargeItemDragLocation->SetupAttachment(GetCapsuleComponent());
+
 }
 
 void ASurvivalCraft_PYPCharacter::BeginPlay()
