@@ -307,3 +307,50 @@ void ASurvivalCraft_PYPCharacter::UpdateCameraShakeState()
 		}
 	}
 }
+
+bool ASurvivalCraft_PYPCharacter::AddItemToInventory(FName TargetItemName, int32 AmountToAdd)
+{
+	if (AmountToAdd <= 0) return false;
+
+	// Ayni esyadan var mi ve yigin (stack) kapasite uygun mu kontrol et
+	for (FItemData& Slot : InventorySlots)
+	{
+		if (Slot.ItemName == TargetItemName && Slot.Amount < Slot.MaxStack)
+		{
+			int32 AvailableSpace = Slot.MaxStack - Slot.Amount;
+
+			if (AmountToAdd <= AvailableSpace)
+			{
+				Slot.Amount += AmountToAdd;
+				return true;
+			}
+			else
+			{
+				Slot.Amount = Slot.MaxStack;
+				AmountToAdd -= AvailableSpace;
+			}
+		}
+	}
+
+	// 2. Hala Elimizde esya kaldiysa, bos slot var mi kontrol et
+	for (FItemData& Slot : InventorySlots)
+	{
+		if (Slot.ItemName == NAME_None || Slot.Amount <= 0)
+		{
+			Slot.ItemName = TargetItemName;
+			Slot.MaxStack = 10; // Varsayilan max stack degeri
+
+			if (AmountToAdd <= Slot.MaxStack)
+			{
+				Slot.Amount = AmountToAdd;
+				return true;
+			}
+			else
+			{
+				Slot.Amount = Slot.MaxStack;
+				AmountToAdd -= Slot.MaxStack;
+			}
+		}
+	}
+	return false;
+}

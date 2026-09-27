@@ -17,6 +17,29 @@ enum class EMovementShakeState : uint8
 	Running
 };
 
+USTRUCT(BlueprintType)
+struct FItemData
+{
+	 GENERATED_BODY()
+
+	 UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	 FName ItemName;
+
+	 UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	 int32 Amount;
+
+	 UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	 int32 MaxStack;
+
+	 // Baslangic degerleri ayarlamak icin bir constructor
+	 FItemData()
+	 {
+		 ItemName = NAME_None;
+		 Amount = 0;
+		 MaxStack = 10;
+	 }
+};
+
 class UInputComponent;
 class USkeletalMeshComponent;
 class UCameraComponent;
@@ -192,5 +215,15 @@ private:
 
 		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction")
 		class USceneComponent* LargeItemDragLocation;
+
+protected:
+	// Karakterin envanter yuvalari
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	TArray<FItemData> InventorySlots;
+
+public:
+	// esyayi envantere ekleyen fonksiyon
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	bool AddItemToInventory(FName TargetItemName, int32 AmountToAdd);
 
 };
