@@ -96,10 +96,11 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float SprintSpeed = 600.0f;
-
+    
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UAttributeComponent* AttributeComponent;
 
+	// Camera Shake siniflari (Blueprint uzerinden atanabilir)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Shake")
 	TSubclassOf<UCameraShakeBase> IdleCameraShakeClass;
 
@@ -108,6 +109,25 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Shake")
 	TSubclassOf<UCameraShakeBase> RunCameraShakeClass;
+
+	// Flashlight sistemi icin gerekli degiskenler
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	class USpotLightComponent* FlashLight;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	class UStaticMeshComponent* FlashLightMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FlashLight")
+	bool bIsFlashLightOn;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FlashLight")
+	bool bHasFlashLight;
+
+	UPROPERTY(EditDefaultsOnly, Category = "FlashLight")
+	TSubclassOf<class AActor> FlashLightItemClass;
+
+
+
 
 protected:
 
@@ -152,6 +172,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Camera Shake")
 	void PlayCameraShake(TSubclassOf<UCameraShakeBase> ShakeClass, float Scale = 1.0f);
 
+
+public:
+
+	UFUNCTION(BlueprintCallable, Category = "FlashLight")
+	void ToggleFlashLight();
+
+	UFUNCTION(BlueprintCallable, Category = "FlashLight")
+	void DropFlashLight();
+
+	UFUNCTION(BlueprintCallable, Category = "FlashLight")
+	void PickupFlashLight();
 
 protected:
 

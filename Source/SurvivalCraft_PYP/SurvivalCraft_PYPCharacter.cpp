@@ -12,6 +12,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Camera/CameraShakeBase.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
+#include "Components/SpotLightComponent.h"
 #include "SurvivalCraft_PYP.h"
 #include "../../../../Program Files/Epic Games/UE_5.8/Engine/Plugins/VirtualProduction/TextureShare/Source/TextureShareCore/Private/Module/TextureShareCoreLogDefines.h"
 
@@ -41,7 +42,7 @@ ASurvivalCraft_PYPCharacter::ASurvivalCraft_PYPCharacter()
 	FirstPersonCameraComponent->FirstPersonFieldOfView = 70.0f;
 	FirstPersonCameraComponent->FirstPersonScale = 0.6f;
 
-	// configure the character comps
+	// Configure the character comps
 	GetMesh()->SetOwnerNoSee(true);
 	GetMesh()->FirstPersonPrimitiveType = EFirstPersonPrimitiveType::WorldSpaceRepresentation;
 
@@ -51,7 +52,7 @@ ASurvivalCraft_PYPCharacter::ASurvivalCraft_PYPCharacter()
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 	GetCharacterMovement()->AirControl = 0.5f;
 
-	// bileseni bellekte baslatiyor
+	// Bileseni bellekte baslatiyor
 	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributeComponent"));
 
 	PhysicsHandle = CreateDefaultSubobject<UPhysicsHandleComponent>(TEXT("PhysicsHandle"));
@@ -61,6 +62,19 @@ ASurvivalCraft_PYPCharacter::ASurvivalCraft_PYPCharacter()
 
 	LargeItemDragLocation = CreateDefaultSubobject<USceneComponent>(TEXT("LargeItemDragLocation"));
 	LargeItemDragLocation->SetupAttachment(GetCapsuleComponent());
+
+	// Fenerin baslangic degerlerini ayarliyoruz
+	FlashLight = CreateDefaultSubobject<USpotLightComponent>(TEXT("FlashLight"));
+	// Blueprint icinde kameraya bagliyacagiz
+	FlashLight->SetupAttachment(FirstPersonCameraComponent);
+	bIsFlashLightOn = false;
+	FlashLight->SetVisibility(false);
+	bHasFlashLight = false;
+
+	// 3D Model bilesenini olusturma (Yeni ekleyeceğin kodlar)
+	FlashLightMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FlashLightMesh"));
+	FlashLightMesh->SetupAttachment(FirstPersonCameraComponent);
+	FlashLightMesh->SetVisibility(false);
 
 }
 
@@ -353,4 +367,45 @@ bool ASurvivalCraft_PYPCharacter::AddItemToInventory(FName TargetItemName, int32
 		}
 	}
 	return false;
+}
+
+void ASurvivalCraft_PYPCharacter::ToggleFlashLight()
+{
+	// Fenerin varligini kontrol et
+	if (!bHasFlashLight) return;
+
+	bIsFlashLightOn = !bIsFlashLightOn;
+	FlashLight->SetVisibility(bIsFlashLightOn);
+}
+
+void ASurvivalCraft_PYPCharacter::DropFlashLight()
+{
+	// 1. Karakterde fener yoksa veya Blueprint'te FlashLightItemClass atanmadıysa çıkış yap
+	if (!bHasFlashLight || !FlashLightItemClass) return;
+
+	// 2. Fenerin dunyada olusacagi konumu (karakterin 100 birim onu) ve aciyi belirle
+	FVector DropLocation = GetActorLocation() + GetActorForwardVector() * 100.0f;
+	FRotator DropRotation = GetActorRotation();
+
+	// 3. Feneri dunyada olustur
+	GetWorld()->SpawnActor<AActor>(FlashLightItemClass, DropLocation, DropRotation);
+
+	// 4. Feneri karakterden kaldir
+	bHasFlashLight = false;
+	bIsFlashLightOn = false;
+	FlashLight->SetVisibility(false);
+
+	if (FlashLightMesh)
+	{
+		FlashLightMesh->SetVisibility(false);
+	}
+}
+
+void ASurvivalCraft_PYPCharacter::PickupFlashLight()
+{
+	bHasFlashLight = true;
+	if (FlashLightMesh)
+	{
+		FlashLightMesh->SetVisibility(true);
+	}
 }
